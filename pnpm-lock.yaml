@@ -349,6 +349,9 @@ importers:
       react-hook-form:
         specifier: ^7.62.0
         version: 7.62.0(react@19.2.3)
+      react-mcu:
+        specifier: ^1.1.0
+        version: 1.1.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-resizable-panels:
         specifier: ^3.0.6
         version: 3.0.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -597,7 +600,7 @@ importers:
         version: 5.9.2
       vite-tsconfig-paths:
         specifier: ^4.2.0
-        version: 4.3.2(typescript@5.9.2)(vite@7.1.12(@types/node@20.19.10)(jiti@2.6.1)(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.1))
+        version: 4.3.2(typescript@5.9.2)(vite@5.4.19(@types/node@20.19.10)(lightningcss@1.30.1))
       vitest:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.10)(lightningcss@1.30.1)(msw@2.10.4(@types/node@20.19.10)(typescript@5.9.2))
@@ -1793,6 +1796,9 @@ packages:
   '@manypkg/tools@1.1.2':
     resolution: {integrity: sha512-3lBouSuF7CqlseLB+FKES0K4FQ02JrbEoRtJhxnsyB1s5v4AP03gsoohN8jp7DcOImhaR9scYdztq3/sLfk/qQ==}
     engines: {node: '>=14.18.0'}
+
+  '@material/material-color-utilities@0.3.0':
+    resolution: {integrity: sha512-ztmtTd6xwnuh2/xu+Vb01btgV8SQWYCaK56CkRK8gEkWe5TuDyBcYJ0wgkMRn+2VcE9KUmhvkz+N9GHrqw/C0g==}
 
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
@@ -6000,6 +6006,9 @@ packages:
     resolution: {integrity: sha512-gvVijfZvn7R+2qyPX8mAuKcFGDf6Nc61GdvGafQsHL0sBIxfKzA+usWn4GFC/bk+QdwPUD4kWFJLhElipq+0VA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  lodash-es@4.17.22:
+    resolution: {integrity: sha512-XEawp1t0gxSi9x01glktRZ5HDy0HXqrM0x5pXQM98EaI0NxO6jVM7omDOxsuEo5UIASAnm2bRp1Jt/e0a2XU8Q==}
+
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
@@ -7054,6 +7063,12 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
+  react-mcu@1.1.0:
+    resolution: {integrity: sha512-Yf2WCNgGHNhpnYNJsbuzQW5Ka6ke/KZfgBj/MDefWrP6SLaySiIaqoMxnQQNUvHYnG7iNX7BQlL5clYJZlE2og==}
+    peerDependencies:
+      react: ^19.2.3
+      react-dom: ^19.2.3
 
   react-medium-image-zoom@5.4.0:
     resolution: {integrity: sha512-BsE+EnFVQzFIlyuuQrZ9iTwyKpKkqdFZV1ImEQN573QPqGrIUuNni7aF+sZwDcxlsuOMayCr6oO/PZR/yJnbRg==}
@@ -9547,6 +9562,8 @@ snapshots:
       fast-glob: 3.3.3
       jju: 1.4.0
       js-yaml: 4.1.0
+
+  '@material/material-color-utilities@0.3.0': {}
 
   '@mdx-js/mdx@3.1.1':
     dependencies:
@@ -12809,7 +12826,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -12820,7 +12837,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.39.0(eslint@9.33.0(jiti@2.6.1))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.33.0(jiti@2.6.1)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.39.0(eslint@9.33.0(jiti@2.6.1))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.33.0(jiti@2.6.1)))(eslint@9.33.0(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -12842,7 +12859,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -12871,7 +12888,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.33.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.39.0(eslint@9.33.0(jiti@2.6.1))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.33.0(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.39.0(eslint@9.33.0(jiti@2.6.1))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.33.0(jiti@2.6.1)))(eslint@9.33.0(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -14349,6 +14366,8 @@ snapshots:
     dependencies:
       p-locate: 6.0.0
 
+  lodash-es@4.17.22: {}
+
   lodash.camelcase@4.3.0: {}
 
   lodash.clone@4.5.0: {}
@@ -15627,6 +15646,13 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
+
+  react-mcu@1.1.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      '@material/material-color-utilities': 0.3.0
+      lodash-es: 4.17.22
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   react-medium-image-zoom@5.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
@@ -16959,6 +16985,17 @@ snapshots:
       - supports-color
       - terser
 
+  vite-tsconfig-paths@4.3.2(typescript@5.9.2)(vite@5.4.19(@types/node@20.19.10)(lightningcss@1.30.1)):
+    dependencies:
+      debug: 4.4.1
+      globrex: 0.1.2
+      tsconfck: 3.1.6(typescript@5.9.2)
+    optionalDependencies:
+      vite: 5.4.19(@types/node@20.19.10)(lightningcss@1.30.1)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
   vite-tsconfig-paths@4.3.2(typescript@5.9.2)(vite@7.1.12(@types/node@20.19.10)(jiti@1.21.7)(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.1)):
     dependencies:
       debug: 4.4.1
@@ -16966,17 +17003,6 @@ snapshots:
       tsconfck: 3.1.6(typescript@5.9.2)
     optionalDependencies:
       vite: 7.1.12(@types/node@20.19.10)(jiti@1.21.7)(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.1)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-
-  vite-tsconfig-paths@4.3.2(typescript@5.9.2)(vite@7.1.12(@types/node@20.19.10)(jiti@2.6.1)(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.1)):
-    dependencies:
-      debug: 4.4.1
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@5.9.2)
-    optionalDependencies:
-      vite: 7.1.12(@types/node@20.19.10)(jiti@2.6.1)(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
