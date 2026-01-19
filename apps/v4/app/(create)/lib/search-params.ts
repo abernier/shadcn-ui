@@ -68,6 +68,7 @@ const designSystemSearchParams = {
   ] as const).withDefault("next"),
   size: parseAsInteger.withDefault(100),
   custom: parseAsBoolean.withDefault(false),
+  useMcu: parseAsBoolean.withDefault(false),
 }
 
 export const loadDesignSystemSearchParams = createLoader(

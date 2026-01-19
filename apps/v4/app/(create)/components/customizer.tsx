@@ -13,6 +13,7 @@ import { BaseColorPicker } from "@/app/(create)/components/base-color-picker"
 import { BasePicker } from "@/app/(create)/components/base-picker"
 import { FontPicker } from "@/app/(create)/components/font-picker"
 import { IconLibraryPicker } from "@/app/(create)/components/icon-library-picker"
+import { McuPicker } from "@/app/(create)/components/mcu-picker"
 import { MenuColorPicker } from "@/app/(create)/components/menu-picker"
 import { PresetPicker } from "@/app/(create)/components/preset-picker"
 import { RadiusPicker } from "@/app/(create)/components/radius-picker"
@@ -77,6 +78,7 @@ export function Customizer() {
           <RadiusPicker isMobile={isMobile} anchorRef={anchorRef} />
           <MenuColorPicker isMobile={isMobile} anchorRef={anchorRef} />
           <MenuAccentPicker isMobile={isMobile} anchorRef={anchorRef} />
+          <McuPicker isMobile={isMobile} anchorRef={anchorRef} />
           <div className="mt-auto hidden w-full flex-col items-center gap-0 md:flex">
             <RandomButton />
             <ResetButton />
