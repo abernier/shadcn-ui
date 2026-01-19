@@ -11,6 +11,7 @@ export type LockableParam =
   | "menuAccent"
   | "menuColor"
   | "radius"
+  | "useMcu"
 
 type LocksContextValue = {
   locks: Set<LockableParam>
