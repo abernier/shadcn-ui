@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Mcu } from "react-mcu"
 
 import {
   buildRegistryTheme,
@@ -10,6 +11,7 @@ import {
 import { useIframeMessageListener } from "@/app/(create)/hooks/use-iframe-sync"
 import { FONTS } from "@/app/(create)/lib/fonts"
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params"
+import { getThemeHexColor } from "@/app/(create)/lib/theme-colors"
 
 export function DesignSystemProvider({
   children,
@@ -17,7 +19,7 @@ export function DesignSystemProvider({
   children: React.ReactNode
 }) {
   const [
-    { style, theme, font, baseColor, menuAccent, menuColor, radius },
+    { style, theme, font, baseColor, menuAccent, menuColor, radius, useMcu },
     setSearchParams,
   ] = useDesignSystemSearchParams({
     shallow: true, // No need to go through the server…
@@ -128,8 +130,48 @@ export function DesignSystemProvider({
     }
     cssText += "}\n"
 
+    // Add MCU color mapping if useMcu is enabled
+    if (useMcu) {
+      cssText += `
+:root, .dark {
+  --background: var(--mcu-surface);
+  --foreground: var(--mcu-on-surface);
+  --card: var(--mcu-surface-container-low);
+  --card-foreground: var(--mcu-on-surface);
+  --popover: var(--mcu-surface-container-high);
+  --popover-foreground: var(--mcu-on-surface);
+  --primary: var(--mcu-primary);
+  --primary-foreground: var(--mcu-on-primary);
+  --secondary: var(--mcu-secondary-container);
+  --secondary-foreground: var(--mcu-on-secondary-container);
+  --muted: var(--mcu-surface-container-highest);
+  --muted-foreground: var(--mcu-on-surface-variant);
+  --accent: var(--mcu-secondary-container);
+  --accent-foreground: var(--mcu-on-secondary-container);
+  --destructive: var(--mcu-error);
+  --destructive-foreground: var(--mcu-on-error);
+  --border: var(--mcu-outline-variant);
+  --input: var(--mcu-outline);
+  --ring: var(--mcu-primary);
+  --chart-1: var(--mcu-primary-fixed);
+  --chart-2: var(--mcu-secondary-fixed);
+  --chart-3: var(--mcu-tertiary-fixed);
+  --chart-4: var(--mcu-primary-fixed-dim);
+  --chart-5: var(--mcu-secondary-fixed-dim);
+  --sidebar: var(--mcu-surface-container-low);
+  --sidebar-foreground: var(--mcu-on-surface);
+  --sidebar-primary: var(--mcu-primary);
+  --sidebar-primary-foreground: var(--mcu-on-primary);
+  --sidebar-accent: var(--mcu-secondary-container);
+  --sidebar-accent-foreground: var(--mcu-on-secondary-container);
+  --sidebar-border: var(--mcu-outline-variant);
+  --sidebar-ring: var(--mcu-primary);
+}
+`
+    }
+
     styleElement.textContent = cssText
-  }, [registryTheme])
+  }, [registryTheme, useMcu])
 
   // Handle menu color inversion by adding/removing dark class to elements with cn-menu-target.
   React.useEffect(() => {
@@ -170,5 +212,17 @@ export function DesignSystemProvider({
     return null
   }
 
-  return <>{children}</>
+  const content = <>{children}</>
+
+  // Wrap with MCU provider if enabled
+  if (useMcu && theme) {
+    const sourceColor = getThemeHexColor(theme)
+    return (
+      <Mcu source={sourceColor} scheme="vibrant" contrast={0}>
+        {content}
+      </Mcu>
+    )
+  }
+
+  return content
 }
