@@ -72,6 +72,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "culori": "^4.0.2",
     "date-fns": "^4.1.0",
     "dedent": "^1.6.0",
     "embla-carousel-autoplay": "8.5.2",
@@ -116,6 +117,7 @@
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@tailwindcss/postcss": "^4",
+    "@types/culori": "^4.0.1",
     "@types/lodash": "^4.17.7",
     "@types/mdx": "^2.0.13",
     "@types/node": "^20",
