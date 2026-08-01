@@ -36,12 +36,14 @@ import {
   type StyleName,
   type ThemeName,
 } from "@/registry/config"
+import { parseExternalThemeUrl } from "@/app/(app)/(create)/lib/external-theme"
 import { FONTS } from "@/app/(app)/(create)/lib/fonts"
 import { getPresetCode } from "@/app/(app)/(create)/lib/preset-code"
 import { resolvePresetOverrides } from "@/app/(app)/(create)/lib/preset-query"
 
 const designSystemSearchParams = {
   preset: parseAsString.withDefault("b0"),
+  themeUrl: parseAsString,
   base: parseAsStringLiteral<BaseName>(BASES.map((b) => b.name)).withDefault(
     DEFAULT_CONFIG.base
   ),
@@ -125,6 +127,7 @@ const NON_DESIGN_SYSTEM_KEYS = [
   "base",
   "item",
   "preset",
+  "themeUrl",
   "template",
   "rtl",
   "pointer",
@@ -227,6 +230,7 @@ function resolvePresetParams(
         base: rawParams.base,
         item: rawParams.item,
         preset: rawParams.preset,
+        themeUrl: rawParams.themeUrl,
         template: rawParams.template,
         rtl: rawParams.rtl,
         pointer: rawParams.pointer,
@@ -235,6 +239,20 @@ function resolvePresetParams(
       })
     }
   }
+
+  // CLI parity: a registry item URL is accepted wherever a preset code is.
+  // Read it as the external theme applied over the default configuration —
+  // PresetHandler later rewrites the URL into its canonical form.
+  const presetThemeUrl = rawParams.preset
+    ? parseExternalThemeUrl(rawParams.preset)
+    : null
+  if (presetThemeUrl && !rawParams.themeUrl) {
+    return normalizeDesignSystemParams({
+      ...rawParams,
+      themeUrl: presetThemeUrl,
+    })
+  }
+
   return normalizeDesignSystemParams(rawParams)
 }
 

@@ -8,6 +8,7 @@ import {
   POINTER_CURSOR_SELECTOR,
   type DesignSystemConfig,
 } from "@/registry/config"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
 import { useIframeMessageListener } from "@/app/(app)/(create)/hooks/use-iframe-sync"
 import { FONTS } from "@/app/(app)/(create)/lib/fonts"
 import {
@@ -41,7 +42,10 @@ function removeManagedBodyClasses(body: Element) {
 function buildCssRule(selector: string, cssVars?: Record<string, string>) {
   const declarations = Object.entries(cssVars ?? {})
     .filter(([, value]) => Boolean(value))
-    .map(([key, value]) => `  --${key}: ${value};`)
+    .map(
+      ([key, value]) =>
+        `  ${key.startsWith("--") ? key : `--${key}`}: ${value};`
+    )
     .join("\n")
 
   if (!declarations) {
@@ -87,6 +91,10 @@ export function DesignSystemProvider({
     radius,
   } = searchParams
   const effectiveRadius = style === "lyra" ? "none" : radius
+  const externalTheme = useExternalTheme()
+  const externalCssVars = externalTheme.theme?.cssVars
+  const externalOwnsFont = externalTheme.overrides.font
+  const externalOwnsFontHeading = externalTheme.overrides.fontHeading
   const selectedFont = React.useMemo(
     () => FONTS.find((fontOption) => fontOption.value === font),
     [font]
@@ -166,14 +174,28 @@ export function DesignSystemProvider({
     // Update font.
     // Always set --font-sans for the preview so the selected font is visible.
     // The font type (sans/serif/mono) is metadata for the CLI updater.
-    if (selectedFont) {
+    // When the external theme defines a font variable, clear the inline value
+    // so the injected :root variable wins instead.
+    if (externalOwnsFont) {
+      document.documentElement.style.removeProperty("--font-sans")
+    } else if (selectedFont) {
       document.documentElement.style.setProperty(
         "--font-sans",
         selectedFont.font.style.fontFamily
       )
     }
 
-    if (selectedHeadingFont) {
+    if (externalOwnsFontHeading) {
+      document.documentElement.style.removeProperty("--font-heading")
+    } else if (
+      externalOwnsFont &&
+      (fontHeading === "inherit" || fontHeading === font)
+    ) {
+      document.documentElement.style.setProperty(
+        "--font-heading",
+        "var(--font-sans)"
+      )
+    } else if (selectedHeadingFont) {
       document.documentElement.style.setProperty(
         "--font-heading",
         selectedHeadingFont.font.style.fontFamily
@@ -189,6 +211,8 @@ export function DesignSystemProvider({
     baseColor,
     selectedFont,
     selectedHeadingFont,
+    externalOwnsFont,
+    externalOwnsFontHeading,
   ])
 
   const registryTheme = React.useMemo(() => {
@@ -205,8 +229,15 @@ export function DesignSystemProvider({
       radius: effectiveRadius,
     }
 
-    return buildRegistryTheme(config)
-  }, [baseColor, theme, chartColor, menuAccent, effectiveRadius])
+    return buildRegistryTheme(config, externalCssVars)
+  }, [
+    baseColor,
+    theme,
+    chartColor,
+    menuAccent,
+    effectiveRadius,
+    externalCssVars,
+  ])
 
   // Use useLayoutEffect for synchronous CSS var updates.
   React.useLayoutEffect(() => {

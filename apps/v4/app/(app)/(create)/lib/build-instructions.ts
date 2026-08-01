@@ -1,4 +1,5 @@
 import dedent from "dedent"
+import { type RegistryItem } from "shadcn/schema"
 
 import { UI_COMPONENTS } from "@/lib/components"
 import {
@@ -10,8 +11,11 @@ import {
 } from "@/registry/config"
 
 // Builds step-by-step markdown instructions for manually setting up a project.
-export function buildInstructions(config: DesignSystemConfig) {
-  const registryBase = buildRegistryBase(config)
+export function buildInstructions(
+  config: DesignSystemConfig,
+  externalCssVars?: RegistryItem["cssVars"]
+) {
+  const registryBase = buildRegistryBase(config, externalCssVars)
   const normalizedFontHeading =
     config.fontHeading === config.font ? "inherit" : config.fontHeading
 

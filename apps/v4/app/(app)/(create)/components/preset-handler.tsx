@@ -4,6 +4,8 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { generateRandomPreset, isPresetCode } from "shadcn/preset"
 
+import { parseExternalThemeUrl } from "@/app/(app)/(create)/lib/external-theme"
+import { getPresetCode } from "@/app/(app)/(create)/lib/preset-code"
 import { useDesignSystemSearchParams } from "@/app/(app)/(create)/lib/search-params"
 
 export function PresetHandler() {
@@ -31,8 +33,21 @@ export function PresetHandler() {
       return
     }
 
+    // CLI parity: a registry item URL is accepted wherever a preset code is.
+    // Use router.replace like the random branch — writing the default preset
+    // code through setParams would drop it from the URL (clearOnDefault) and
+    // re-trigger the initial preset sync, which would erase themeUrl.
+    const themeUrl = parseExternalThemeUrl(params.preset)
+    if (themeUrl) {
+      const nextSearchParams = new URLSearchParams(window.location.search)
+      nextSearchParams.set("preset", getPresetCode(params))
+      nextSearchParams.set("themeUrl", themeUrl)
+      router.replace(`/create?${nextSearchParams.toString()}`)
+      return
+    }
+
     setParams({ base: params.base })
-  }, [params.preset, params.base, setParams])
+  }, [params, router, setParams])
 
   return null
 }

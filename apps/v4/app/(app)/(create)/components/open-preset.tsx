@@ -37,7 +37,8 @@ import { useDesignSystemSearchParams } from "@/app/(app)/(create)/lib/search-par
 
 const PRESET_EXAMPLE = "b2D0wqNxT"
 const PRESET_TITLE = "Open Preset"
-const PRESET_DESCRIPTION = "Paste a preset code to load a saved configuration."
+const PRESET_DESCRIPTION =
+  "Paste a preset code or a registry item URL to load a saved configuration."
 
 export function OpenPreset({
   className,
@@ -50,8 +51,8 @@ export function OpenPreset({
   const isMobile = useIsMobile()
   const { open, setOpen } = useOpenPreset()
 
-  const nextPreset = React.useMemo(() => parsePresetInput(input), [input])
-  const isInvalid = input.trim().length > 0 && nextPreset === null
+  const parsedInput = React.useMemo(() => parsePresetInput(input), [input])
+  const isInvalid = input.trim().length > 0 && parsedInput === null
 
   const handleOpenChange = React.useCallback(
     (nextOpen: boolean) => {
@@ -68,14 +69,14 @@ export function OpenPreset({
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault()
 
-      if (!nextPreset) {
+      if (!parsedInput) {
         return
       }
 
-      setParams({ preset: nextPreset })
+      setParams(parsedInput)
       handleOpenChange(false)
     },
-    [handleOpenChange, nextPreset, setParams]
+    [handleOpenChange, parsedInput, setParams]
   )
 
   const triggerClassName = cn(
@@ -97,7 +98,7 @@ export function OpenPreset({
           id="preset-code"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder={`${PRESET_EXAMPLE} or --preset ${PRESET_EXAMPLE}`}
+          placeholder={`${PRESET_EXAMPLE}, --preset ${PRESET_EXAMPLE}, or theme URL`}
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
@@ -125,7 +126,7 @@ export function OpenPreset({
           <form onSubmit={handleSubmit}>
             <div className="px-4 py-2">{fields}</div>
             <DrawerFooter>
-              <Button type="submit" className="h-10" disabled={!nextPreset}>
+              <Button type="submit" className="h-10" disabled={!parsedInput}>
                 Open
               </Button>
               <DrawerClose
@@ -156,7 +157,7 @@ export function OpenPreset({
             <DialogClose render={<Button variant="outline" type="button" />}>
               Cancel
             </DialogClose>
-            <Button type="submit" disabled={!nextPreset}>
+            <Button type="submit" disabled={!parsedInput}>
               Open
             </Button>
           </DialogFooter>

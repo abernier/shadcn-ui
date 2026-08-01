@@ -51,6 +51,8 @@ import {
   ToggleGroupItem,
 } from "@/styles/base-nova/ui/toggle-group"
 import { usePresetCode } from "@/app/(app)/(create)/hooks/use-design-system"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
+import { getInitUrl } from "@/app/(app)/(create)/lib/init-url"
 import {
   useDesignSystemSearchParams,
   type DesignSystemSearchParams,
@@ -105,7 +107,10 @@ type ThemeCssVars = NonNullable<
 
 function formatCssVarsRule(selector: string, cssVars?: Record<string, string>) {
   const declarations = Object.entries(cssVars ?? {})
-    .map(([key, value]) => `  --${key}: ${value};`)
+    .map(
+      ([key, value]) =>
+        `  ${key.startsWith("--") ? key : `--${key}`}: ${value};`
+    )
     .join("\n")
 
   return `${selector} {\n${declarations}\n}`
@@ -113,7 +118,7 @@ function formatCssVarsRule(selector: string, cssVars?: Record<string, string>) {
 
 function formatThemeCss(cssVars: ThemeCssVars) {
   return [
-    formatCssVarsRule(":root", cssVars.light),
+    formatCssVarsRule(":root", { ...(cssVars.theme ?? {}), ...cssVars.light }),
     formatCssVarsRule(".dark", cssVars.dark),
   ].join("\n\n")
 }
@@ -124,6 +129,15 @@ export function ProjectForm({
   const [open, setOpen] = React.useState(false)
   const [params, setParams] = useDesignSystemSearchParams()
   const presetCode = usePresetCode()
+  const externalTheme = useExternalTheme()
+  // A theme that failed to load is not on screen — commands fall back to the
+  // plain preset code so they reproduce what the preview shows.
+  const hasExternalTheme = Boolean(params.themeUrl) && !externalTheme.error
+  const presetArgument = React.useMemo(
+    () =>
+      hasExternalTheme ? `"${getInitUrl(params, presetCode)}"` : presetCode,
+    [hasExternalTheme, params, presetCode]
+  )
   const [config, setConfig] = useConfig()
   const [copiedTarget, setCopiedTarget] = React.useState<CopyTarget | null>(
     null
@@ -147,7 +161,7 @@ export function ProjectForm({
   )
 
   const commands = React.useMemo(() => {
-    const presetFlag = ` --preset ${presetCode}`
+    const presetFlag = ` --preset ${presetArgument}`
     const baseFlag =
       params.base !== DEFAULT_CONFIG.base ? ` --base ${params.base}` : ""
     const templateFlag = ` --template ${framework}`
@@ -175,13 +189,13 @@ export function ProjectForm({
     params.base,
     params.pointer,
     params.rtl,
-    presetCode,
+    presetArgument,
   ])
 
   const command = commands[packageManager]
 
   const applyCommands = React.useMemo(() => {
-    const presetFlag = ` --preset ${presetCode}`
+    const presetFlag = ` --preset ${presetArgument}`
     const onlyFlag =
       applyMode === "theme"
         ? " --only theme"
@@ -203,7 +217,7 @@ export function ProjectForm({
           yarn: `yarn dlx shadcn${SHADCN_VERSION} apply${flags}`,
           bun: `bunx --bun shadcn${SHADCN_VERSION} apply${flags}`,
         }
-  }, [applyMode, presetCode])
+  }, [applyMode, presetArgument])
 
   const applyCommand = applyCommands[packageManager]
   const themeConfig = React.useMemo<DesignSystemConfig>(() => {
@@ -243,15 +257,16 @@ export function ProjectForm({
     params.theme,
   ])
 
+  const externalCssVars = externalTheme.theme?.cssVars
   const themeCss = React.useMemo(() => {
-    const theme = buildThemeForPreset(themeConfig)
+    const theme = buildThemeForPreset(themeConfig, externalCssVars)
 
     if (!theme.cssVars) {
       return ""
     }
 
     return formatThemeCss(theme.cssVars)
-  }, [themeConfig])
+  }, [themeConfig, externalCssVars])
 
   React.useEffect(() => {
     if (copiedTarget) {

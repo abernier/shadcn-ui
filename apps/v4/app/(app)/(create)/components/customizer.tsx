@@ -20,6 +20,7 @@ import { BaseColorPicker } from "@/app/(app)/(create)/components/base-color-pick
 import { BasePicker } from "@/app/(app)/(create)/components/base-picker"
 import { ChartColorPicker } from "@/app/(app)/(create)/components/chart-color-picker"
 import { CopyPreset } from "@/app/(app)/(create)/components/copy-preset"
+import { ExternalThemeControl } from "@/app/(app)/(create)/components/external-theme-control"
 import { FontPicker } from "@/app/(app)/(create)/components/font-picker"
 import { IconLibraryPicker } from "@/app/(app)/(create)/components/icon-library-picker"
 import { MainMenu } from "@/app/(app)/(create)/components/main-menu"
@@ -76,6 +77,7 @@ export function Customizer({
       </CardHeader>
       <CardContent className="no-scrollbar min-h-0 flex-1 overflow-x-auto overflow-y-hidden md:overflow-y-auto">
         <FieldGroup className="flex-row gap-2.5 py-px **:data-[slot=field-separator]:-mx-4 **:data-[slot=field-separator]:w-auto md:flex-col md:gap-3.25">
+          <ExternalThemeControl />
           <StylePicker
             styles={STYLES}
             isMobile={isMobile}
