@@ -14,6 +14,7 @@ import {
   PickerTrigger,
 } from "@/app/(app)/(create)/components/picker"
 import { usePreviewOverride } from "@/app/(app)/(create)/components/preview-override"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
 import { FONTS } from "@/app/(app)/(create)/lib/fonts"
 import {
   useDesignSystemSearchParams,
@@ -46,6 +47,10 @@ export function FontPicker({
 }) {
   const [params, setParams] = useDesignSystemSearchParams()
   const { setOverride, clearOverride } = usePreviewOverride()
+  const externalTheme = useExternalTheme()
+  const isOverridden = externalTheme.overrides[param]
+  const externalThemeName =
+    externalTheme.theme?.title ?? externalTheme.theme?.name
   const currentValue = param === "font" ? params.font : params.fontHeading
   const handleFontChange = React.useCallback(
     (value: string) => {
@@ -102,11 +107,14 @@ export function FontPicker({
           }
         }}
       >
-        <PickerTrigger>
+        <PickerTrigger
+          disabled={isOverridden}
+          title={isOverridden ? `Set by ${externalThemeName}` : undefined}
+        >
           <div className="flex flex-col justify-start text-left">
             <div className="text-xs text-muted-foreground">{label}</div>
             <div className="line-clamp-1 max-w-[80%] truncate text-sm font-medium text-foreground">
-              {displayFontName}
+              {isOverridden ? externalThemeName : displayFontName}
             </div>
           </div>
           <div

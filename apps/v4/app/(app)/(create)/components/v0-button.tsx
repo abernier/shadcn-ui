@@ -22,10 +22,14 @@ export function V0Button({ className }: { className?: string }) {
       searchParams.set("preset", params.preset)
     }
 
+    if (params.themeUrl) {
+      searchParams.set("themeUrl", params.themeUrl)
+    }
+
     searchParams.set("base", params.base)
 
     return `${process.env.NEXT_PUBLIC_APP_URL}/init/v0?${searchParams.toString()}`
-  }, [params.preset, params.base])
+  }, [params.preset, params.themeUrl, params.base])
 
   const title = React.useMemo(() => {
     return params.base && params.style
@@ -45,7 +49,7 @@ export function V0Button({ className }: { className?: string }) {
       className={cn("h-[31px] gap-1 rounded-lg", className)}
       render={
         <a
-          href={`${process.env.NEXT_PUBLIC_V0_URL}/chat/api/open?url=${url}&title=${title}`}
+          href={`${process.env.NEXT_PUBLIC_V0_URL}/chat/api/open?url=${encodeURIComponent(url)}&title=${title}`}
           target="_blank"
         />
       }

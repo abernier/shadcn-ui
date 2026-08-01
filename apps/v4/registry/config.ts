@@ -694,8 +694,26 @@ export function parseRegistryBaseParts(value: string | null) {
   }
 }
 
-// Builds a registry:theme item from a design system config.
-export function buildRegistryTheme(config: DesignSystemConfig) {
+// Checks whether an external theme defines a CSS variable in any block.
+function hasExternalCssVar(
+  externalCssVars: RegistryItem["cssVars"] | undefined,
+  key: string
+) {
+  return Boolean(
+    externalCssVars?.light?.[key] ??
+      externalCssVars?.dark?.[key] ??
+      externalCssVars?.theme?.[key] ??
+      externalCssVars?.theme?.[`--${key}`]
+  )
+}
+
+// Builds a registry:theme item from a design system config. External cssVars
+// (from a registry item URL) overlay the built-in theme and win over the
+// derived transformations for any variable they define.
+export function buildRegistryTheme(
+  config: DesignSystemConfig,
+  externalCssVars?: RegistryItem["cssVars"]
+) {
   const baseColor = getBaseColor(config.baseColor)
   const theme = getTheme(config.theme)
 
@@ -709,12 +727,16 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
   const lightVars: Record<string, string> = {
     ...(baseColor.cssVars?.light as Record<string, string>),
     ...(theme.cssVars?.light as Record<string, string>),
+    ...(externalCssVars?.light ?? {}),
   }
   const darkVars: Record<string, string> = {
     ...(baseColor.cssVars?.dark as Record<string, string>),
     ...(theme.cssVars?.dark as Record<string, string>),
+    ...(externalCssVars?.dark ?? {}),
   }
-  const themeVars: Record<string, string> = {}
+  const themeVars: Record<string, string> = {
+    ...(externalCssVars?.theme ?? {}),
+  }
 
   // Apply chart color override.
   const chartTheme = getTheme(config.chartColor)
@@ -723,13 +745,18 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
     const chartDark = chartTheme.cssVars?.dark as Record<string, string>
     for (let i = 1; i <= 5; i++) {
       const key = `chart-${i}`
-      if (chartLight?.[key]) lightVars[key] = chartLight[key]
-      if (chartDark?.[key]) darkVars[key] = chartDark[key]
+      if (chartLight?.[key] && !externalCssVars?.light?.[key])
+        lightVars[key] = chartLight[key]
+      if (chartDark?.[key] && !externalCssVars?.dark?.[key])
+        darkVars[key] = chartDark[key]
     }
   }
 
   // Apply menu accent transformation.
-  if (config.menuAccent === "bold") {
+  if (
+    config.menuAccent === "bold" &&
+    !hasExternalCssVar(externalCssVars, "accent")
+  ) {
     lightVars.accent = lightVars.primary
     lightVars["accent-foreground"] = lightVars["primary-foreground"]
     darkVars.accent = darkVars.primary
@@ -741,7 +768,11 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
   }
 
   // Apply radius transformation.
-  if (config.radius && config.radius !== "default") {
+  if (
+    config.radius &&
+    config.radius !== "default" &&
+    !hasExternalCssVar(externalCssVars, "radius")
+  ) {
     const radius = RADII.find((r) => r.name === config.radius)
     if (radius && radius.value) {
       lightVars.radius = radius.value
@@ -759,11 +790,15 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
   }
 }
 
-export function buildThemeForPreset(config: DesignSystemConfig) {
-  const registryTheme = buildRegistryTheme(config)
+export function buildThemeForPreset(
+  config: DesignSystemConfig,
+  externalCssVars?: RegistryItem["cssVars"]
+) {
+  const registryTheme = buildRegistryTheme(config, externalCssVars)
   const radius = RADII.find((r) => r.name === config.radius)
-  const radiusValue =
-    config.radius === "default"
+  const radiusValue = hasExternalCssVar(externalCssVars, "radius")
+    ? registryTheme.cssVars?.light?.radius
+    : config.radius === "default"
       ? (registryTheme.cssVars?.light?.radius ?? DEFAULT_RADIUS_VALUE)
       : (radius?.value ?? registryTheme.cssVars?.light?.radius)
 
@@ -782,7 +817,10 @@ export function buildThemeForPreset(config: DesignSystemConfig) {
 }
 
 // Builds a registry:base item from a design system config.
-export function buildRegistryBase(config: DesignSystemConfig) {
+export function buildRegistryBase(
+  config: DesignSystemConfig,
+  externalCssVars?: RegistryItem["cssVars"]
+) {
   const baseItem = getBase(config.base)
   const iconLibraryItem = getIconLibrary(config.iconLibrary)
   const normalizedFontHeading =
@@ -794,7 +832,12 @@ export function buildRegistryBase(config: DesignSystemConfig) {
     )
   }
 
-  const registryTheme = buildRegistryTheme(config)
+  const registryTheme = buildRegistryTheme(config, externalCssVars)
+  const externalOwnsFont = hasExternalCssVar(externalCssVars, "font-sans")
+  const externalOwnsFontHeading = hasExternalCssVar(
+    externalCssVars,
+    "font-heading"
+  )
 
   // Build dependencies.
   const dependencies = [
@@ -808,16 +851,16 @@ export function buildRegistryBase(config: DesignSystemConfig) {
   const registryDependencies = ["utils"]
   const themeVars = {
     ...(registryTheme.cssVars?.theme ?? {}),
-    ...(normalizedFontHeading === "inherit"
+    ...(normalizedFontHeading === "inherit" && !externalOwnsFontHeading
       ? { "--font-heading": getInheritedHeadingFontValue(config.font) }
       : {}),
   }
 
-  if (config.font) {
+  if (config.font && !externalOwnsFont) {
     registryDependencies.push(`font-${config.font}`)
   }
 
-  if (normalizedFontHeading !== "inherit") {
+  if (normalizedFontHeading !== "inherit" && !externalOwnsFontHeading) {
     registryDependencies.push(`font-heading-${normalizedFontHeading}`)
   }
 
@@ -862,7 +905,8 @@ export function buildRegistryBase(config: DesignSystemConfig) {
 
 export function buildPartialRegistryBase(
   config: DesignSystemConfig,
-  parts: RegistryBasePart[]
+  parts: RegistryBasePart[],
+  externalCssVars?: RegistryItem["cssVars"]
 ) {
   const uniqueParts = Array.from(new Set(parts))
   const normalizedFontHeading =
@@ -878,7 +922,7 @@ export function buildPartialRegistryBase(
   const cssVars: NonNullable<RegistryItem["cssVars"]> = {}
 
   if (uniqueParts.includes("theme")) {
-    const registryTheme = buildRegistryTheme(config)
+    const registryTheme = buildRegistryTheme(config, externalCssVars)
 
     partialConfig.menuColor = config.menuColor
     partialConfig.menuAccent = config.menuAccent
@@ -903,14 +947,18 @@ export function buildPartialRegistryBase(
   }
 
   if (uniqueParts.includes("font")) {
-    registryDependencies.push(`font-${config.font}`)
+    if (!hasExternalCssVar(externalCssVars, "font-sans")) {
+      registryDependencies.push(`font-${config.font}`)
+    }
 
-    if (normalizedFontHeading !== "inherit") {
-      registryDependencies.push(`font-heading-${normalizedFontHeading}`)
-    } else {
-      cssVars.theme = {
-        ...(cssVars.theme ?? {}),
-        "--font-heading": getInheritedHeadingFontValue(config.font),
+    if (!hasExternalCssVar(externalCssVars, "font-heading")) {
+      if (normalizedFontHeading !== "inherit") {
+        registryDependencies.push(`font-heading-${normalizedFontHeading}`)
+      } else {
+        cssVars.theme = {
+          ...(cssVars.theme ?? {}),
+          "--font-heading": getInheritedHeadingFontValue(config.font),
+        }
       }
     }
   }

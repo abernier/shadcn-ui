@@ -9,6 +9,7 @@ describe("buildPresetUrlUpdate", () => {
     const update = buildPresetUrlUpdate({
       ...DEFAULT_CONFIG,
       preset: "b0",
+      themeUrl: null,
       template: "next",
       item: "preview-02",
       size: 100,
@@ -25,6 +26,7 @@ describe("buildPresetUrlUpdate", () => {
     const update = buildPresetUrlUpdate({
       ...DEFAULT_CONFIG,
       preset: "b0",
+      themeUrl: null,
       template: "start",
       item: "preview-02",
       size: 100,
@@ -40,6 +42,7 @@ describe("buildPresetUrlUpdate", () => {
       {
         ...DEFAULT_CONFIG,
         preset: "b0",
+        themeUrl: null,
         template: "next",
         item: "preview-02",
         size: 100,
@@ -49,5 +52,20 @@ describe("buildPresetUrlUpdate", () => {
     )
 
     expect(update.template).toBe("vite")
+  })
+
+  it("preserves themeUrl across design system updates", () => {
+    const update = buildPresetUrlUpdate({
+      ...DEFAULT_CONFIG,
+      preset: "b0",
+      themeUrl: "https://registry.example.com/theme.json",
+      template: "next",
+      item: "preview-02",
+      size: 100,
+      custom: false,
+    })
+
+    expect(update.themeUrl).toBe("https://registry.example.com/theme.json")
+    expect(update.preset).toBeTypeOf("string")
   })
 })

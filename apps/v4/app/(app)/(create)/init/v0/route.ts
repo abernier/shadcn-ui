@@ -2,6 +2,7 @@ import { after, NextResponse, type NextRequest } from "next/server"
 import { track } from "@vercel/analytics/server"
 import { isPresetCode } from "shadcn/preset"
 
+import { resolveExternalThemeCssVars } from "@/app/(app)/(create)/lib/external-theme"
 import { parseDesignSystemConfig } from "@/app/(app)/(create)/lib/parse-config"
 import { getPresetCode } from "@/app/(app)/(create)/lib/preset-code"
 import { buildV0Payload } from "@/app/(app)/(create)/lib/v0"
@@ -29,7 +30,15 @@ export async function GET(request: NextRequest) {
       })
     })
 
-    const payload = await buildV0Payload(result.data)
+    const externalResult = await resolveExternalThemeCssVars(searchParams)
+    if (!externalResult.success) {
+      return NextResponse.json(
+        { error: externalResult.error },
+        { status: externalResult.status }
+      )
+    }
+
+    const payload = await buildV0Payload(result.data, externalResult.cssVars)
 
     return NextResponse.json(payload)
   } catch (error) {

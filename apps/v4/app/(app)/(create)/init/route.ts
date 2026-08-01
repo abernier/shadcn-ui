@@ -8,6 +8,7 @@ import {
   buildRegistryBase,
   parseRegistryBaseParts,
 } from "@/registry/config"
+import { resolveExternalThemeCssVars } from "@/app/(app)/(create)/lib/external-theme"
 import { parseDesignSystemConfig } from "@/app/(app)/(create)/lib/parse-config"
 import { getPresetCode } from "@/app/(app)/(create)/lib/preset-code"
 
@@ -31,9 +32,21 @@ export async function GET(request: NextRequest) {
         ? rawPreset
         : getPresetCode(result.data)
 
+    const externalResult = await resolveExternalThemeCssVars(searchParams)
+    if (!externalResult.success) {
+      return NextResponse.json(
+        { error: externalResult.error },
+        { status: externalResult.status }
+      )
+    }
+
     const registryBase = onlyResult.parts
-      ? buildPartialRegistryBase(result.data, onlyResult.parts)
-      : buildRegistryBase(result.data)
+      ? buildPartialRegistryBase(
+          result.data,
+          onlyResult.parts,
+          externalResult.cssVars
+        )
+      : buildRegistryBase(result.data, externalResult.cssVars)
     const parseResult = registryItemSchema.safeParse(registryBase)
 
     if (!parseResult.success) {

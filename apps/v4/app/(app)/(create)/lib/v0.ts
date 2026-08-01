@@ -178,7 +178,10 @@ function getStyle(designSystemConfig: DesignSystemConfig) {
   return `${designSystemConfig.base}-${designSystemConfig.style}`
 }
 
-export async function buildV0Payload(designSystemConfig: DesignSystemConfig) {
+export async function buildV0Payload(
+  designSystemConfig: DesignSystemConfig,
+  externalCssVars?: RegistryItem["cssVars"]
+) {
   if (designSystemConfig.item) {
     const allowedItems = await getItemsForBase(designSystemConfig.base)
     const isAllowed = allowedItems.some(
@@ -189,7 +192,7 @@ export async function buildV0Payload(designSystemConfig: DesignSystemConfig) {
     }
   }
 
-  const registryBase = buildRegistryBase(designSystemConfig)
+  const registryBase = buildRegistryBase(designSystemConfig, externalCssVars)
   const normalizedFontHeading =
     designSystemConfig.fontHeading === designSystemConfig.font
       ? "inherit"

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
   buildRegistryBase,
@@ -70,5 +70,92 @@ describe("GET /init", () => {
     expect(json.error).toBe(
       "Invalid only value. Use one or more of: theme, font"
     )
+  })
+
+  describe("with a themeUrl", () => {
+    const THEME_URL = "https://registry.example.com/theme.json"
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+
+    it("merges the external theme into the registry base", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          new Response(
+            JSON.stringify({
+              name: "midnight",
+              type: "registry:theme",
+              cssVars: {
+                light: { primary: "oklch(0.5 0.2 30)" },
+                dark: { primary: "oklch(0.7 0.2 30)" },
+              },
+            }),
+            { status: 200 }
+          )
+        )
+      )
+
+      const response = await GET(
+        createRequest(`?themeUrl=${encodeURIComponent(THEME_URL)}`)
+      )
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json.cssVars.light.primary).toBe("oklch(0.5 0.2 30)")
+      expect(json.cssVars.dark.primary).toBe("oklch(0.7 0.2 30)")
+      // Variables the theme does not define are unchanged.
+      expect(json.cssVars.light.background).toBe(
+        buildRegistryBase(DEFAULT_CONFIG).cssVars.light.background
+      )
+    })
+
+    it("drops hostile variables from the external theme", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          new Response(
+            JSON.stringify({
+              name: "hostile",
+              type: "registry:theme",
+              cssVars: {
+                light: {
+                  primary: "red;} body{display:none}",
+                  accent: "blue",
+                },
+              },
+            }),
+            { status: 200 }
+          )
+        )
+      )
+
+      const response = await GET(
+        createRequest(`?themeUrl=${encodeURIComponent(THEME_URL)}`)
+      )
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json.cssVars.light.accent).toBe("blue")
+      expect(json.cssVars.light.primary).toBe(
+        buildRegistryBase(DEFAULT_CONFIG).cssVars.light.primary
+      )
+    })
+
+    it("propagates fetch failures with their message", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(new Response("gone", { status: 404 }))
+      )
+
+      const response = await GET(
+        createRequest(`?themeUrl=${encodeURIComponent(THEME_URL)}`)
+      )
+      const json = await response.json()
+
+      expect(response.status).toBe(502)
+      expect(json.error).toBe("Failed to fetch theme (HTTP 404).")
+    })
   })
 })

@@ -14,6 +14,7 @@ import {
   PickerTrigger,
 } from "@/app/(app)/(create)/components/picker"
 import { usePreviewOverride } from "@/app/(app)/(create)/components/preview-override"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
 import { useDesignSystemSearchParams } from "@/app/(app)/(create)/lib/search-params"
 
 export function RadiusPicker({
@@ -25,8 +26,14 @@ export function RadiusPicker({
 }) {
   const [params, setParams] = useDesignSystemSearchParams()
   const { setOverride, clearOverride } = usePreviewOverride()
-  const isRadiusLocked = params.style === "lyra" || params.style === "sera"
-  const selectedRadiusName = isRadiusLocked ? "none" : params.radius
+  const externalTheme = useExternalTheme()
+  const isOverridden = externalTheme.overrides.radius
+  const externalThemeName =
+    externalTheme.theme?.title ?? externalTheme.theme?.name
+  const isRadiusLocked =
+    params.style === "lyra" || params.style === "sera" || isOverridden
+  const selectedRadiusName =
+    params.style === "lyra" || params.style === "sera" ? "none" : params.radius
 
   const currentRadius = RADII.find(
     (radius) => radius.name === selectedRadiusName
@@ -43,11 +50,14 @@ export function RadiusPicker({
           }
         }}
       >
-        <PickerTrigger disabled={isRadiusLocked}>
+        <PickerTrigger
+          disabled={isRadiusLocked}
+          title={isOverridden ? `Set by ${externalThemeName}` : undefined}
+        >
           <div className="flex flex-col justify-start text-left">
             <div className="text-xs text-muted-foreground">Radius</div>
-            <div className="text-sm font-medium text-foreground">
-              {currentRadius?.label}
+            <div className="truncate text-sm font-medium text-foreground">
+              {isOverridden ? externalThemeName : currentRadius?.label}
             </div>
           </div>
           <div className="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 rotate-90 items-center justify-center text-base text-foreground select-none md:right-2.5">

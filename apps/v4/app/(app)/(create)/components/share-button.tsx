@@ -21,12 +21,16 @@ export function ShareButton() {
       item: params.item,
     })
 
+    if (params.themeUrl) {
+      searchParams.set("themeUrl", params.themeUrl)
+    }
+
     if (params.pointer) {
       searchParams.set("pointer", "true")
     }
 
     return `${origin}/create?${searchParams.toString()}`
-  }, [params.item, params.pointer, presetCode])
+  }, [params.item, params.pointer, params.themeUrl, presetCode])
 
   React.useEffect(() => {
     if (hasCopied) {

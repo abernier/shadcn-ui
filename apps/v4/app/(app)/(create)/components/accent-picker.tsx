@@ -11,6 +11,7 @@ import {
   PickerTrigger,
 } from "@/app/(app)/(create)/components/picker"
 import { usePreviewOverride } from "@/app/(app)/(create)/components/preview-override"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
 import { useDesignSystemSearchParams } from "@/app/(app)/(create)/lib/search-params"
 
 export function MenuAccentPicker({
@@ -22,6 +23,10 @@ export function MenuAccentPicker({
 }) {
   const [params, setParams] = useDesignSystemSearchParams()
   const { setOverride, clearOverride } = usePreviewOverride()
+  const externalTheme = useExternalTheme()
+  const isOverridden = externalTheme.overrides.menuAccent
+  const externalThemeName =
+    externalTheme.theme?.title ?? externalTheme.theme?.name
 
   const currentAccent = MENU_ACCENTS.find(
     (accent) => accent.value === params.menuAccent
@@ -36,11 +41,14 @@ export function MenuAccentPicker({
           }
         }}
       >
-        <PickerTrigger>
+        <PickerTrigger
+          disabled={isOverridden}
+          title={isOverridden ? `Set by ${externalThemeName}` : undefined}
+        >
           <div className="flex flex-col justify-start text-left">
             <div className="text-xs text-muted-foreground">Menu Accent</div>
-            <div className="text-sm font-medium text-foreground">
-              {currentAccent?.label}
+            <div className="truncate text-sm font-medium text-foreground">
+              {isOverridden ? externalThemeName : currentAccent?.label}
             </div>
           </div>
           <div className="pointer-events-none absolute top-1/2 right-4 flex size-4 -translate-y-1/2 items-center justify-center text-base text-foreground select-none md:right-2.5">

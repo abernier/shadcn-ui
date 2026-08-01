@@ -15,6 +15,7 @@ import {
   PickerTrigger,
 } from "@/app/(app)/(create)/components/picker"
 import { usePreviewOverride } from "@/app/(app)/(create)/components/preview-override"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
 import { useDesignSystemSearchParams } from "@/app/(app)/(create)/lib/search-params"
 
 export function ThemePicker({
@@ -29,6 +30,10 @@ export function ThemePicker({
   const mounted = useMounted()
   const [params, setParams] = useDesignSystemSearchParams()
   const { setOverride, clearOverride } = usePreviewOverride()
+  const externalTheme = useExternalTheme()
+  const isOverridden = externalTheme.overrides.theme
+  const externalThemeName =
+    externalTheme.theme?.title ?? externalTheme.theme?.name
 
   const currentTheme = React.useMemo(
     () => themes.find((theme) => theme.name === params.theme),
@@ -49,14 +54,17 @@ export function ThemePicker({
           }
         }}
       >
-        <PickerTrigger>
+        <PickerTrigger
+          disabled={isOverridden}
+          title={isOverridden ? `Set by ${externalThemeName}` : undefined}
+        >
           <div className="flex flex-col justify-start text-left">
             <div className="text-xs text-muted-foreground">Theme</div>
-            <div className="text-sm font-medium text-foreground">
-              {currentTheme?.title}
+            <div className="truncate text-sm font-medium text-foreground">
+              {isOverridden ? externalThemeName : currentTheme?.title}
             </div>
           </div>
-          {mounted && (
+          {mounted && !isOverridden && (
             <div
               style={
                 {

@@ -19,6 +19,7 @@ import {
   PickerTrigger,
 } from "@/app/(app)/(create)/components/picker"
 import { usePreviewOverride } from "@/app/(app)/(create)/components/preview-override"
+import { useExternalTheme } from "@/app/(app)/(create)/hooks/use-external-theme"
 import { useDesignSystemSearchParams } from "@/app/(app)/(create)/lib/search-params"
 
 export function ChartColorPicker({
@@ -31,6 +32,10 @@ export function ChartColorPicker({
   const mounted = useMounted()
   const [params, setParams] = useDesignSystemSearchParams()
   const { setOverride, clearOverride } = usePreviewOverride()
+  const externalTheme = useExternalTheme()
+  const isOverridden = externalTheme.overrides.chartColor
+  const externalThemeName =
+    externalTheme.theme?.title ?? externalTheme.theme?.name
 
   const availableChartColors = React.useMemo(
     () => getThemesForBaseColor(params.baseColor),
@@ -57,14 +62,17 @@ export function ChartColorPicker({
           }
         }}
       >
-        <PickerTrigger>
+        <PickerTrigger
+          disabled={isOverridden}
+          title={isOverridden ? `Set by ${externalThemeName}` : undefined}
+        >
           <div className="flex flex-col justify-start text-left">
             <div className="text-xs text-muted-foreground">Chart Color</div>
-            <div className="text-sm font-medium text-foreground">
-              {currentChartColor?.title}
+            <div className="truncate text-sm font-medium text-foreground">
+              {isOverridden ? externalThemeName : currentChartColor?.title}
             </div>
           </div>
-          {mounted && (
+          {mounted && !isOverridden && (
             <div
               style={
                 {
